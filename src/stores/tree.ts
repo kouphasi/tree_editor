@@ -1,28 +1,20 @@
-import { createEffect } from 'solid-js'
-import { createStore, reconcile, unwrap } from 'solid-js/store'
-import { addNode, createNode, removeNode, renameNode } from '../domain/tree/operations'
-import type { Tree, TreeNode } from '../domain/tree/types'
-import { treeFromHash } from '../lib/url-state/decode'
+import { createEffect, createMemo, createSignal, onCleanup } from 'solid-js'
+import { parseTree } from '../domain/tree/parser'
+import { textFromHash } from '../lib/url-state/decode'
 import { toHash } from '../lib/url-state/encode'
 
 export function createTreeStore() {
-  const [tree, setTree] = createStore<Tree>(treeFromHash(location.hash))
+  const [text, setText] = createSignal(textFromHash(location.hash))
+  const tree = createMemo(() => parseTree(text()))
 
-  const apply = (fn: (t: Tree) => Tree) => setTree(reconcile(fn(unwrap(tree)), { key: 'id' }))
-
-  // ツリー変更のたびにURL hashを更新（履歴は増やさない）
+  // テキスト変更のたびにURL hashを更新（履歴は増やさない）。replaceState の連続呼び出しを避けるため間引く
   createEffect(() => {
-    const hash = toHash(JSON.parse(JSON.stringify(tree)))
-    history.replaceState(null, '', hash)
+    const hash = toHash(text())
+    const timer = setTimeout(() => history.replaceState(null, '', hash || location.pathname + location.search), 300)
+    onCleanup(() => clearTimeout(timer))
   })
 
-  return {
-    tree,
-    add: (parentId: string | null, type: TreeNode['type']) =>
-      apply((t) => addNode(t, parentId, createNode(type, type === 'file' ? 'new-file' : 'new-dir'))),
-    remove: (id: string) => apply((t) => removeNode(t, id)),
-    rename: (id: string, name: string) => apply((t) => renameNode(t, id, name)),
-  }
+  return { text, setText, tree }
 }
 
 export type TreeStore = ReturnType<typeof createTreeStore>

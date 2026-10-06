@@ -1,4 +1,5 @@
 import { decompressFromEncodedURIComponent } from 'lz-string'
+import { stringifyTree } from '../../domain/tree/parser'
 import type { Tree, TreeNode } from '../../domain/tree/types'
 
 function isNode(v: unknown): v is TreeNode {
@@ -20,8 +21,23 @@ export function decodeTree(encoded: string): Tree | null {
   }
 }
 
-/** location.hash（例: "#data=xxxx"）から Tree を復元する。無効なら空のツリー。 */
-export function treeFromHash(hash: string): Tree {
-  const encoded = new URLSearchParams(hash.replace(/^#/, '')).get('data')
-  return (encoded && decodeTree(encoded)) || []
+export function decodeText(encoded: string): string | null {
+  try {
+    return decompressFromEncodedURIComponent(encoded) || null
+  } catch {
+    return null
+  }
+}
+
+/**
+ * location.hash からエディタのテキストを復元する。
+ * "#text=xxxx" が現行形式。旧形式 "#data=xxxx"（Tree JSON）はインデントテキストへ変換して読み込む。
+ */
+export function textFromHash(hash: string): string {
+  const params = new URLSearchParams(hash.replace(/^#/, ''))
+  const text = params.get('text')
+  if (text) return decodeText(text) ?? ''
+  const data = params.get('data')
+  const tree = data && decodeTree(data)
+  return tree ? stringifyTree(tree) : ''
 }
