@@ -8,7 +8,7 @@ import './style.css'
 
 export default function App() {
   const store = createTreeStore()
-  const text = createMemo(() => generateTree(JSON.parse(JSON.stringify(store.tree))))
+  const text = createMemo(() => generateTree(store.tree()))
   return (
     <div class="app">
       <header>
