@@ -1,19 +1,180 @@
+@import url('https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+JP:wght@400;500;600&family=JetBrains+Mono:wght@400;500;600&display=swap');
+
+:root {
+  --bg: #eef0f3;
+  --ink: #10131a;
+  --ink-2: #343a46;
+  --ink-3: #4a5160;
+  --ink-muted: #5a6170;
+  --rule: #8a90a0;
+  --accent: oklch(0.55 0.18 255);
+  --font-sans: 'IBM Plex Sans JP', system-ui, sans-serif;
+  --font-mono: 'JetBrains Mono', ui-monospace, Menlo, monospace;
+  --glass-edge: rgba(255, 255, 255, 0.65);
+  --glass-shadow: rgba(30, 40, 80, 0.14);
+}
+
 * { box-sizing: border-box; }
-body { margin: 0; font-family: system-ui, sans-serif; }
-.app { display: flex; flex-direction: column; height: 100vh; }
-header { padding: 8px 16px; border-bottom: 1px solid #ddd; }
-h1 { margin: 0; font-size: 18px; }
-h2 { margin: 0 0 8px; font-size: 14px; color: #555; }
-main { flex: 1; display: grid; grid-template-columns: 1fr 1fr; min-height: 0; }
-.pane { padding: 12px 16px; overflow: auto; }
-.pane + .pane { border-left: 1px solid #ddd; }
-.editor-pane { display: flex; flex-direction: column; }
-.editor-pane .muted { margin: 0 0 8px; }
-.editor { flex: 1; min-height: 240px; width: 100%; resize: none; padding: 8px; border: 1px solid #ccc; border-radius: 4px; font-family: ui-monospace, Menlo, monospace; font-size: 14px; line-height: 1.5; tab-size: 4; }
-.editor:focus { outline: none; border-color: #888; }
-code { font-family: ui-monospace, Menlo, monospace; background: #f2f2f2; padding: 0 3px; border-radius: 3px; }
-button { font: inherit; font-size: 12px; padding: 2px 8px; cursor: pointer; }
-pre { font-family: ui-monospace, Menlo, monospace; font-size: 14px; margin: 0; }
-.muted { color: #888; font-size: 13px; }
-.toolbar { padding: 8px 16px; border-top: 1px solid #ddd; }
-@media (max-width: 700px) { main { grid-template-columns: 1fr; } .pane + .pane { border-left: 0; border-top: 1px solid #ddd; } }
+html, body { height: 100%; }
+body { margin: 0; background: var(--bg); color: var(--ink); font-family: var(--font-sans); }
+
+.app {
+  position: relative;
+  isolation: isolate;
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+  height: 100vh;
+  height: 100dvh;
+  padding: 22px 28px 24px;
+  overflow: hidden;
+}
+
+/* ガラス越しに透ける淡い色のにじみ */
+.backdrop { position: absolute; inset: 0; z-index: -1; pointer-events: none; }
+.backdrop::before,
+.backdrop::after {
+  content: '';
+  position: absolute;
+  border-radius: 50%;
+  filter: blur(120px);
+}
+.backdrop::before { width: 900px; height: 700px; left: -200px; top: -300px; background: oklch(0.9 0.035 250); opacity: 0.8; }
+.backdrop::after { width: 800px; height: 600px; right: -240px; bottom: -280px; background: oklch(0.92 0.025 220); opacity: 0.7; }
+
+/* Liquid Glass: 半透明 + 背景ぼかし + 上端のハイライトと浮遊影 */
+.glass {
+  background: rgba(255, 255, 255, 0.38);
+  -webkit-backdrop-filter: blur(24px) saturate(180%);
+  backdrop-filter: blur(24px) saturate(180%);
+  border: 1px solid var(--glass-edge);
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.9),
+    inset 0 -1px 0 rgba(255, 255, 255, 0.25),
+    0 10px 30px var(--glass-shadow);
+}
+
+/* ツールバー */
+.toolbar, .hints { flex: none; display: flex; justify-content: center; }
+.toolbar-pill {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  max-width: 100%;
+  height: 52px;
+  padding: 0 8px 0 18px;
+  border-radius: 26px;
+}
+.logo { font: 600 14px var(--font-mono); }
+h1 { margin: 0 8px 0 0; font-size: 14px; font-weight: 600; letter-spacing: -0.01em; white-space: nowrap; }
+
+.btn {
+  height: 36px;
+  padding: 0 14px;
+  border: 1px solid rgba(255, 255, 255, 0.7);
+  border-radius: 18px;
+  background: rgba(255, 255, 255, 0.45);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.9);
+  font: 500 12.5px var(--font-sans);
+  color: var(--ink);
+  white-space: nowrap;
+  cursor: pointer;
+  transition: background 0.15s;
+}
+.btn:hover { background: rgba(255, 255, 255, 0.7); }
+.btn-primary {
+  min-width: 92px;
+  padding: 0 16px;
+  border: none;
+  background: rgba(16, 19, 26, 0.88);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.25), 0 4px 12px rgba(16, 19, 26, 0.25);
+  font-weight: 600;
+  color: #fff;
+}
+.btn-primary:hover { background: var(--ink); }
+.btn:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+
+/* パネル */
+main { flex: 1; min-height: 0; display: grid; grid-template-columns: 1fr 1fr; gap: 18px; }
+.pane {
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
+  border-radius: 28px;
+  -webkit-backdrop-filter: blur(30px) saturate(180%);
+  backdrop-filter: blur(30px) saturate(180%);
+}
+.editor-pane {
+  background: rgba(255, 255, 255, 0.32);
+  border-color: rgba(255, 255, 255, 0.6);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.85), inset 0 0 0 1px rgba(255, 255, 255, 0.15), 0 24px 60px rgba(30, 40, 80, 0.16);
+}
+.preview-pane {
+  background: rgba(255, 255, 255, 0.55);
+  border-color: rgba(255, 255, 255, 0.75);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.95), 0 24px 60px rgba(30, 40, 80, 0.18);
+}
+.pane-header { flex: none; display: flex; align-items: center; justify-content: space-between; padding: 18px 24px 6px; }
+h2 { margin: 0; font-size: 12px; font-weight: 600; letter-spacing: 0.06em; color: var(--ink-2); }
+.pane-meta { font-size: 11.5px; color: var(--ink-3); }
+.pane-body { flex: 1; min-height: 0; overflow: auto; padding: 10px 24px 24px; }
+
+.editor {
+  flex: 1;
+  min-height: 0;
+  width: 100%;
+  padding: 10px 24px 24px;
+  border: none;
+  outline: none;
+  resize: none;
+  background: transparent;
+  font: 400 14px/1.75 var(--font-mono);
+  color: var(--ink);
+  caret-color: var(--accent);
+  tab-size: 4;
+}
+.editor::placeholder { color: #a8a7a0; }
+
+.tree { margin: 0; font: 400 14px/1.75 var(--font-mono); }
+.tree-prefix { color: var(--rule); }
+.tree-label { color: var(--ink-2); }
+.tree-label.is-dir { color: var(--ink); font-weight: 600; }
+.empty { margin: 0; font-size: 13px; color: var(--ink-muted); }
+
+/* キー操作のヒント */
+.hints-pill {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  align-items: center;
+  gap: 6px 18px;
+  min-height: 40px;
+  margin: 0;
+  padding: 8px 18px;
+  border-radius: 20px;
+  list-style: none;
+  font-size: 12px;
+  color: var(--ink-2);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.9), 0 8px 24px rgba(30, 40, 80, 0.12);
+}
+.hints-pill li { display: flex; align-items: center; gap: 7px; }
+kbd {
+  padding: 2px 7px;
+  border-radius: 6px;
+  background: rgba(255, 255, 255, 0.7);
+  box-shadow: inset 0 -1px 0 rgba(16, 19, 26, 0.12);
+  font: 500 11px var(--font-mono);
+  color: var(--ink);
+}
+
+/* backdrop-filter 非対応環境では不透明寄りにして可読性を保つ */
+@supports not ((backdrop-filter: blur(1px)) or (-webkit-backdrop-filter: blur(1px))) {
+  .glass { background: rgba(255, 255, 255, 0.85); }
+}
+
+@media (max-width: 700px) {
+  .app { height: auto; min-height: 100dvh; padding: 16px; overflow: visible; }
+  main { grid-template-columns: 1fr; }
+  .pane { min-height: 320px; }
+  .toolbar-pill { height: auto; flex-wrap: wrap; justify-content: center; padding: 8px 12px; }
+}

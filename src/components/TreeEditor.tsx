@@ -67,12 +67,11 @@ export function TreeEditor(props: { store: TreeStore }) {
   }
 
   return (
-    <section class="pane editor-pane">
-      <h2>Tree Editor</h2>
-      <p class="muted">
-        インデントで階層を表します。子を持つ行・末尾が <code>/</code> の行はディレクトリになります。
-        Tab / Shift+Tab でインデント操作できます。
-      </p>
+    <section class="glass pane editor-pane">
+      <div class="pane-header">
+        <h2>入力</h2>
+        <span class="pane-meta">{props.store.text() ? props.store.text().split('\n').length : 0} 行</span>
+      </div>
       <textarea
         class="editor"
         value={props.store.text()}
