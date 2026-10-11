@@ -1,5 +1,3 @@
-@import url('https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+JP:wght@400;500;600&family=JetBrains+Mono:wght@400;500;600&display=swap');
-
 :root {
   --bg: #eef0f3;
   --ink: #10131a;
@@ -10,8 +8,9 @@
   --accent: oklch(0.55 0.18 255);
   --font-sans: 'IBM Plex Sans JP', system-ui, sans-serif;
   --font-mono: 'JetBrains Mono', ui-monospace, Menlo, monospace;
-  --glass-edge: rgba(255, 255, 255, 0.65);
-  --glass-shadow: rgba(30, 40, 80, 0.14);
+  --font-code: 400 14px/1.75 var(--font-mono);
+  --pane-pad: 10px 24px 24px;
+  --shadow-tint: 30, 40, 80;
 }
 
 * { box-sizing: border-box; }
@@ -42,16 +41,19 @@ body { margin: 0; background: var(--bg); color: var(--ink); font-family: var(--f
 .backdrop::before { width: 900px; height: 700px; left: -200px; top: -300px; background: oklch(0.9 0.035 250); opacity: 0.8; }
 .backdrop::after { width: 800px; height: 600px; right: -240px; bottom: -280px; background: oklch(0.92 0.025 220); opacity: 0.7; }
 
-/* Liquid Glass: 半透明 + 背景ぼかし + 上端のハイライトと浮遊影 */
+/* Liquid Glass: 半透明 + 背景ぼかし + 上端のハイライトと浮遊影。各要素は --glass-* だけを上書きする */
 .glass {
-  background: rgba(255, 255, 255, 0.38);
-  -webkit-backdrop-filter: blur(24px) saturate(180%);
-  backdrop-filter: blur(24px) saturate(180%);
+  --glass-bg: rgba(255, 255, 255, 0.38);
+  --glass-edge: rgba(255, 255, 255, 0.65);
+  --glass-blur: 24px;
+  --glass-highlight: rgba(255, 255, 255, 0.9);
+  --glass-inner: inset 0 -1px 0 rgba(255, 255, 255, 0.25);
+  --glass-shadow: 0 10px 30px rgba(var(--shadow-tint), 0.14);
+  background: var(--glass-bg);
+  -webkit-backdrop-filter: blur(var(--glass-blur)) saturate(180%);
+  backdrop-filter: blur(var(--glass-blur)) saturate(180%);
   border: 1px solid var(--glass-edge);
-  box-shadow:
-    inset 0 1px 0 rgba(255, 255, 255, 0.9),
-    inset 0 -1px 0 rgba(255, 255, 255, 0.25),
-    0 10px 30px var(--glass-shadow);
+  box-shadow: inset 0 1px 0 var(--glass-highlight), var(--glass-inner), var(--glass-shadow);
 }
 
 /* ツールバー */
@@ -101,41 +103,44 @@ main { flex: 1; min-height: 0; display: grid; grid-template-columns: 1fr 1fr; ga
   flex-direction: column;
   min-height: 0;
   border-radius: 28px;
-  -webkit-backdrop-filter: blur(30px) saturate(180%);
-  backdrop-filter: blur(30px) saturate(180%);
+  --glass-blur: 30px;
 }
 .editor-pane {
-  background: rgba(255, 255, 255, 0.32);
-  border-color: rgba(255, 255, 255, 0.6);
-  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.85), inset 0 0 0 1px rgba(255, 255, 255, 0.15), 0 24px 60px rgba(30, 40, 80, 0.16);
+  --glass-bg: rgba(255, 255, 255, 0.32);
+  --glass-edge: rgba(255, 255, 255, 0.6);
+  --glass-highlight: rgba(255, 255, 255, 0.85);
+  --glass-inner: inset 0 0 0 1px rgba(255, 255, 255, 0.15);
+  --glass-shadow: 0 24px 60px rgba(var(--shadow-tint), 0.16);
 }
 .preview-pane {
-  background: rgba(255, 255, 255, 0.55);
-  border-color: rgba(255, 255, 255, 0.75);
-  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.95), 0 24px 60px rgba(30, 40, 80, 0.18);
+  --glass-bg: rgba(255, 255, 255, 0.55);
+  --glass-edge: rgba(255, 255, 255, 0.75);
+  --glass-highlight: rgba(255, 255, 255, 0.95);
+  --glass-inner: 0 0 transparent;
+  --glass-shadow: 0 24px 60px rgba(var(--shadow-tint), 0.18);
 }
 .pane-header { flex: none; display: flex; align-items: center; justify-content: space-between; padding: 18px 24px 6px; }
 h2 { margin: 0; font-size: 12px; font-weight: 600; letter-spacing: 0.06em; color: var(--ink-2); }
 .pane-meta { font-size: 11.5px; color: var(--ink-3); }
-.pane-body { flex: 1; min-height: 0; overflow: auto; padding: 10px 24px 24px; }
+.pane-body { flex: 1; min-height: 0; overflow: auto; padding: var(--pane-pad); }
 
 .editor {
   flex: 1;
   min-height: 0;
   width: 100%;
-  padding: 10px 24px 24px;
+  padding: var(--pane-pad);
   border: none;
   outline: none;
   resize: none;
   background: transparent;
-  font: 400 14px/1.75 var(--font-mono);
+  font: var(--font-code);
   color: var(--ink);
   caret-color: var(--accent);
   tab-size: 4;
 }
 .editor::placeholder { color: #a8a7a0; }
 
-.tree { margin: 0; font: 400 14px/1.75 var(--font-mono); }
+.tree { margin: 0; font: var(--font-code); }
 .tree-prefix { color: var(--rule); }
 .tree-label { color: var(--ink-2); }
 .tree-label.is-dir { color: var(--ink); font-weight: 600; }
@@ -155,7 +160,8 @@ h2 { margin: 0; font-size: 12px; font-weight: 600; letter-spacing: 0.06em; color
   list-style: none;
   font-size: 12px;
   color: var(--ink-2);
-  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.9), 0 8px 24px rgba(30, 40, 80, 0.12);
+  --glass-inner: 0 0 transparent;
+  --glass-shadow: 0 8px 24px rgba(var(--shadow-tint), 0.12);
 }
 .hints-pill li { display: flex; align-items: center; gap: 7px; }
 kbd {
