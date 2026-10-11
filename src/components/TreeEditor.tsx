@@ -66,11 +66,16 @@ export function TreeEditor(props: { store: TreeStore }) {
     }
   }
 
+  const lineCount = () => {
+    const t = props.store.text()
+    return t ? t.split('\n').length : 0
+  }
+
   return (
     <section class="glass pane editor-pane">
       <div class="pane-header">
         <h2>入力</h2>
-        <span class="pane-meta">{props.store.text() ? props.store.text().split('\n').length : 0} 行</span>
+        <span class="pane-meta">{lineCount()} 行</span>
       </div>
       <textarea
         class="editor"
