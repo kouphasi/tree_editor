@@ -53,7 +53,8 @@ export function TreeEditor(props: { store: TreeStore }) {
   const onKeyDown = (e: KeyboardEvent & { currentTarget: HTMLTextAreaElement }) => {
     const el = e.currentTarget
     if (e.isComposing) return
-    if (e.key === 'Tab') {
+    // Ctrl+Tab / Ctrl+Shift+Tab はブラウザのタブ切り替えに任せる
+    if (e.key === 'Tab' && !e.ctrlKey) {
       e.preventDefault()
       shiftLines(el, e.shiftKey)
     } else if (e.key === 'Enter' && !e.shiftKey && el.selectionStart === el.selectionEnd) {
