@@ -1,6 +1,6 @@
 import type { TreeStore } from '../stores/tree'
 
-const INDENT = '  '
+const INDENT = '\t'
 
 const PLACEHOLDER = `例:
 src/
