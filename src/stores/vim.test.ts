@@ -1,5 +1,5 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
-import { createRoot } from 'solid-js'
+import { effectScope } from 'vue'
 import { createVimSettings } from './vim'
 
 function stubStorage(initial: Record<string, string> = {}) {
@@ -11,7 +11,10 @@ function stubStorage(initial: Record<string, string> = {}) {
   return data
 }
 
-const make = () => createRoot((dispose) => ({ s: createVimSettings(), dispose }))
+const make = () => {
+  const scope = effectScope()
+  return { s: scope.run(() => createVimSettings())!, dispose: () => scope.stop() }
+}
 
 describe('createVimSettings', () => {
   beforeEach(() => void stubStorage())
@@ -19,16 +22,16 @@ describe('createVimSettings', () => {
 
   it('初期値は無効・空の vimrc', () => {
     const { s, dispose } = make()
-    expect(s.enabled()).toBe(false)
-    expect(s.vimrc()).toBe('')
+    expect(s.enabled.value).toBe(false)
+    expect(s.vimrc.value).toBe('')
     dispose()
   })
 
   it('localStorage から復元する', () => {
     stubStorage({ 'tree-editor:vim': '1', 'tree-editor:vimrc': 'set nu' })
     const { s, dispose } = make()
-    expect(s.enabled()).toBe(true)
-    expect(s.vimrc()).toBe('set nu')
+    expect(s.enabled.value).toBe(true)
+    expect(s.vimrc.value).toBe('set nu')
     dispose()
   })
 
@@ -37,8 +40,8 @@ describe('createVimSettings', () => {
     const { s, dispose } = make()
     s.setEnabled(true)
     s.setVimrc('nmap a b')
-    expect(s.enabled()).toBe(true)
-    expect(s.vimrc()).toBe('nmap a b')
+    expect(s.enabled.value).toBe(true)
+    expect(s.vimrc.value).toBe('nmap a b')
     expect(data).toEqual({ 'tree-editor:vim': '1', 'tree-editor:vimrc': 'nmap a b' })
     s.setEnabled(false)
     expect(data['tree-editor:vim']).toBe('0')
@@ -51,9 +54,9 @@ describe('createVimSettings', () => {
       setItem: () => { throw new Error('denied') },
     })
     const { s, dispose } = make()
-    expect(s.enabled()).toBe(false)
+    expect(s.enabled.value).toBe(false)
     expect(() => s.setEnabled(true)).not.toThrow()
-    expect(s.enabled()).toBe(true)
+    expect(s.enabled.value).toBe(true)
     dispose()
   })
 })

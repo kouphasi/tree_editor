@@ -1,12 +1,15 @@
+<script setup lang="ts" vapor>
 import { Compartment, EditorState } from '@codemirror/state'
 import { indentLess, indentMore, history, historyKeymap, defaultKeymap } from '@codemirror/commands'
 import { EditorView, drawSelection, keymap, placeholder } from '@codemirror/view'
 import { indentService, indentUnit } from '@codemirror/language'
 import { vim } from '@replit/codemirror-vim'
-import { createEffect, createSignal, on, onCleanup, onMount } from 'solid-js'
+import { onBeforeUnmount, onMounted, shallowRef, useTemplateRef, watch } from 'vue'
 import { applyVimrc } from '../lib/vim/apply'
 import type { TreeStore } from '../stores/tree'
 import type { VimSettings } from '../stores/vim'
+
+const props = defineProps<{ store: TreeStore; vimSettings: VimSettings }>()
 
 const INDENT = '\t'
 
@@ -54,68 +57,67 @@ const theme = EditorView.theme({
   '.cm-vim-panel input': { background: 'transparent', color: 'inherit', font: 'inherit', border: 'none', outline: 'none' },
 })
 
-export function TreeEditor(props: { store: TreeStore; vimSettings: VimSettings }) {
-  let host!: HTMLDivElement
-  let view: EditorView | undefined
-  const vimSlot = new Compartment()
-  const [lines, setLines] = createSignal(0)
+const host = useTemplateRef<HTMLDivElement>('host')
+let view: EditorView | undefined
+const vimSlot = new Compartment()
 
-  const countLines = (text: string) => (text ? text.split('\n').length : 0)
+const countLines = (text: string) => (text ? text.split('\n').length : 0)
+const lines = shallowRef(countLines(props.store.text.value))
 
-  onMount(() => {
-    const initial = props.store.text()
-    setLines(countLines(initial))
-    view = new EditorView({
-      parent: host,
-      state: EditorState.create({
-        doc: initial,
-        extensions: [
-          // vim は他のキーマップより先に評価させる必要があるため先頭に置く
-          vimSlot.of(props.vimSettings.enabled() ? vimExt() : []),
-          history(),
-          drawSelection(),
-          EditorState.tabSize.of(4),
-          indentUnit.of(INDENT),
-          treeIndent,
-          placeholder(placeholderEl()),
-          keymap.of([
-            { key: 'Tab', run: indentMore, shift: indentLess },
-            ...historyKeymap,
-            ...defaultKeymap,
-          ]),
-          theme,
-          EditorView.updateListener.of((u) => {
-            if (!u.docChanged) return
-            const text = u.state.doc.toString()
-            setLines(countLines(text))
-            props.store.setText(text)
-          }),
-        ],
-      }),
-    })
-  })
-
-  onCleanup(() => view?.destroy())
-
-  // vim モードの切り替え。マウント直後（view 作成後）にも実行され、以降は設定変更のたびに vimrc を再適用する
-  createEffect(
-    on(
-      () => [props.vimSettings.enabled(), props.vimSettings.vimrc()] as const,
-      ([enabled, vimrc]) => {
-        if (!view) return
-        view.dispatch({ effects: vimSlot.reconfigure(enabled ? vimExt() : []) })
-        if (enabled) applyVimrc(view, vimrc)
-      },
-    ),
-  )
-
-  return (
-    <section class="glass pane editor-pane">
-      <div class="pane-header">
-        <h2>入力{props.vimSettings.enabled() ? ' · VIM' : ''}</h2>
-        <span class="pane-meta">{lines()} 行</span>
-      </div>
-      <div class="editor" ref={host} />
-    </section>
-  )
+/** vim モードの切り替えと vimrc の再適用 */
+function syncVim(enabled: boolean, vimrc: string) {
+  if (!view) return
+  view.dispatch({ effects: vimSlot.reconfigure(enabled ? vimExt() : []) })
+  if (enabled) applyVimrc(view, vimrc)
 }
+
+onMounted(() => {
+  view = new EditorView({
+    parent: host.value!,
+    state: EditorState.create({
+      doc: props.store.text.value,
+      extensions: [
+        // vim は他のキーマップより先に評価させる必要があるため先頭に置く
+        vimSlot.of([]),
+        history(),
+        drawSelection(),
+        EditorState.tabSize.of(4),
+        indentUnit.of(INDENT),
+        treeIndent,
+        placeholder(placeholderEl()),
+        keymap.of([
+          { key: 'Tab', run: indentMore, shift: indentLess },
+          ...historyKeymap,
+          ...defaultKeymap,
+        ]),
+        theme,
+        EditorView.updateListener.of((u) => {
+          if (!u.docChanged) return
+          const text = u.state.doc.toString()
+          lines.value = countLines(text)
+          props.store.setText(text)
+        }),
+      ],
+    }),
+  })
+  syncVim(props.vimSettings.enabled.value, props.vimSettings.vimrc.value)
+})
+
+onBeforeUnmount(() => view?.destroy())
+
+// 設定変更のたびに vim の有効/無効と vimrc を反映する
+watch(
+  () => [props.vimSettings.enabled.value, props.vimSettings.vimrc.value] as const,
+  ([enabled, vimrc]) => syncVim(enabled, vimrc),
+)
+</script>
+
+<template>
+  <section class="glass pane editor-pane">
+    <div class="pane-header">
+      <h2>入力{{ props.vimSettings.enabled.value ? ' · VIM' : '' }}</h2>
+      <span class="pane-meta">{{ lines }} 行</span>
+    </div>
+    <div ref="host" class="editor"></div>
+  </section>
+</template>
