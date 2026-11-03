@@ -8,7 +8,7 @@ import { applyVimrc } from '../lib/vim/apply'
 import type { TreeStore } from '../stores/tree'
 import type { VimSettings } from '../stores/vim'
 
-const INDENT = '  '
+const INDENT = '\t'
 
 const vimExt = () => vim({ status: true })
 
@@ -35,7 +35,7 @@ const treeIndent = indentService.of((ctx, pos) => {
   const before = line.text.slice(0, pos - line.from)
   const base = before.match(/^[ \t]*/)![0]
   const columns = ctx.state.doc.sliceString(line.from, line.from + base.length).replace(/\t/g, ' '.repeat(ctx.state.tabSize)).length
-  return columns + (before.trimEnd().endsWith('/') ? INDENT.length : 0)
+  return columns + (before.trimEnd().endsWith('/') ? ctx.state.tabSize : 0)
 })
 
 const theme = EditorView.theme({
