@@ -51,3 +51,46 @@ describe('leaderKey', () => {
     expect(parseVimrc('let mapleader = " "\nnmap a x').leaderKey).toBeNull()
   })
 })
+
+describe('parseVimrc 追加ケース', () => {
+  it('空入力は何も返さない', () => {
+    expect(parseVimrc('')).toEqual({ commands: [], skipped: [], leaderKey: null })
+  })
+
+  it('先頭の ":" を除去する', () => {
+    expect(parseVimrc(':set nu\n: nnoremap a b').commands).toEqual(['set nu', 'nnoremap a b'])
+  })
+
+  it('CRLF を扱う', () => {
+    expect(parseVimrc('set nu\r\nnmap a b\r\n').commands).toEqual(['set nu', 'nmap a b'])
+  })
+
+  it('mapleader の値が解釈できなければ skipped', () => {
+    const r = parseVimrc('let mapleader = foo')
+    expect(r.commands).toEqual([])
+    expect(r.skipped).toHaveLength(1)
+  })
+
+  it('maplocalleader は leader を変えない', () => {
+    expect(parseVimrc('let maplocalleader = ","\nnmap <leader>a x').commands).toEqual(['nmap \\a x'])
+  })
+
+  it('<Leader> は大文字小文字を区別せず、複数あれば全て置換する', () => {
+    expect(parseVimrc('let mapleader = ","\nnmap <LEADER>a <leader>b').commands).toEqual(['nmap ,a ,b'])
+  })
+
+  it('cmap 系は未対応として skipped', () => {
+    const r = parseVimrc('cmap a b\ncnoremap a b')
+    expect(r.commands).toEqual([])
+    expect(r.skipped.map((s) => s.line)).toEqual([1, 2])
+  })
+
+  it('継続行を含んでも行番号は先頭行のもの', () => {
+    const r = parseVimrc('nmap a b\nsyntax\n  \\ on')
+    expect(r.skipped.map((s) => s.line)).toEqual([2])
+  })
+
+  it('xmap / smap は vmap 系へ読み替える', () => {
+    expect(parseVimrc('xmap a b\nsnoremap c d').commands).toEqual(['vmap a b', 'vnoremap c d'])
+  })
+})
