@@ -124,21 +124,36 @@ h2 { margin: 0; font-size: 12px; font-weight: 600; letter-spacing: 0.06em; color
 .pane-meta { font-size: 11.5px; color: var(--ink-3); }
 .pane-body { flex: 1; min-height: 0; overflow: auto; padding: var(--pane-pad); }
 
-.editor {
-  flex: 1;
-  min-height: 0;
-  width: 100%;
-  padding: var(--pane-pad);
-  border: none;
-  outline: none;
-  resize: none;
-  background: transparent;
-  font: var(--font-code);
-  color: var(--ink);
-  caret-color: var(--accent);
-  tab-size: 4;
+.editor { flex: 1; min-height: 0; overflow: hidden; }
+.editor .cm-editor { height: 100%; }
+.editor-placeholder { color: #a8a7a0; white-space: pre; }
+
+/* Vim 設定ダイアログ */
+.btn.is-on { background: var(--accent); color: #fff; }
+.modal-backdrop {
+  position: fixed; inset: 0; z-index: 10;
+  display: grid; place-items: center; padding: 16px;
+  background: rgba(16, 19, 26, 0.28);
 }
-.editor::placeholder { color: #a8a7a0; }
+.modal {
+  display: flex; flex-direction: column; gap: 14px;
+  width: min(560px, 100%); max-height: 100%; overflow: auto;
+  padding: 22px 24px; border-radius: 24px;
+  --glass-bg: rgba(255, 255, 255, 0.82);
+}
+.modal .check { display: flex; align-items: center; gap: 8px; font-size: 13px; }
+.modal .field { display: flex; flex-direction: column; gap: 6px; font-size: 12px; color: var(--ink-2); }
+.vimrc-input {
+  min-height: 200px; padding: 12px; resize: vertical;
+  border: 1px solid rgba(16, 19, 26, 0.12); border-radius: 12px;
+  background: rgba(255, 255, 255, 0.6); color: var(--ink); font: 400 13px/1.6 var(--font-mono); tab-size: 4;
+}
+.vimrc-input:focus-visible { outline: 2px solid var(--accent); outline-offset: 1px; }
+.modal-note { margin: 0; font-size: 12px; color: var(--ink-3); }
+.modal code { font: 500 11.5px var(--font-mono); }
+.skipped { font-size: 12px; color: var(--ink-2); }
+.skipped ul { margin: 6px 0 0; padding-left: 18px; }
+.modal-actions { display: flex; justify-content: flex-end; gap: 8px; }
 
 .tree { margin: 0; font: var(--font-code); }
 .tree-prefix { color: var(--rule); }
