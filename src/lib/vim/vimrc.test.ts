@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest'
-import { parseVimrc } from './vimrc'
+import { normalizeKeyNotation, parseVimrc } from './vimrc'
 
 describe('parseVimrc', () => {
   it('コメント・空行を無視し、マップと set を抽出する', () => {
@@ -92,5 +92,31 @@ describe('parseVimrc 追加ケース', () => {
 
   it('xmap / smap は vmap 系へ読み替える', () => {
     expect(parseVimrc('xmap a b\nsnoremap c d').commands).toEqual(['vmap a b', 'vnoremap c d'])
+  })
+})
+
+describe('キー表記の正規化', () => {
+  it('小文字の <esc> などをエミュレーション側の表記に揃える', () => {
+    expect(parseVimrc('imap jj <esc>').commands).toEqual(['imap jj <Esc>'])
+    expect(parseVimrc('inoremap jk <ESC>').commands).toEqual(['inoremap jk <Esc>'])
+    expect(parseVimrc('nnoremap <leader>w :w<cr>').commands).toEqual(['nnoremap \\w :w<CR>'])
+  })
+
+  it('修飾子付きキーを正規化する', () => {
+    expect(normalizeKeyNotation('<c-j>')).toBe('<C-j>')
+    expect(normalizeKeyNotation('<C-J>')).toBe('<C-j>')
+    expect(normalizeKeyNotation('<s-tab>')).toBe('<S-Tab>')
+    expect(normalizeKeyNotation('<s-c-x>')).toBe('<C-S-x>')
+    expect(normalizeKeyNotation('<f5>')).toBe('<F5>')
+  })
+
+  it('未知の表記や単独文字はそのまま残す', () => {
+    expect(normalizeKeyNotation('<Plug>Foo')).toBe('<Plug>Foo')
+    expect(normalizeKeyNotation('<gv')).toBe('<gv')
+    expect(normalizeKeyNotation('<a>')).toBe('<a>')
+  })
+
+  it('set の値は変更しない', () => {
+    expect(parseVimrc('set foo=<esc>').commands).toEqual(['set foo=<esc>'])
   })
 })

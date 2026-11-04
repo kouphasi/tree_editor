@@ -121,6 +121,10 @@ main { flex: 1; min-height: 0; display: grid; grid-template-columns: 1fr 1fr; ga
 }
 .pane-header { flex: none; display: flex; align-items: center; justify-content: space-between; padding: 18px 24px 6px; }
 h2 { margin: 0; font-size: 12px; font-weight: 600; letter-spacing: 0.06em; color: var(--ink-2); }
+.vim-mode { margin-left: 10px; padding: 2px 8px; border-radius: 999px; font: 600 11px var(--font-mono); letter-spacing: 0.04em; color: var(--ink-2); background: rgba(16, 19, 26, 0.06); }
+.vim-mode[data-mode='insert'] { color: #fff; background: var(--accent); }
+.vim-mode[data-mode='visual'] { color: #fff; background: #b26a00; }
+.vim-mode[data-mode='replace'] { color: #fff; background: #c0392b; }
 .pane-meta { font-size: 11.5px; color: var(--ink-3); }
 .pane-body { flex: 1; min-height: 0; overflow: auto; padding: var(--pane-pad); }
 

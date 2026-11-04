@@ -2,8 +2,8 @@ import { Compartment, EditorState } from '@codemirror/state'
 import { indentLess, indentMore, history, historyKeymap, defaultKeymap } from '@codemirror/commands'
 import { EditorView, drawSelection, keymap, placeholder } from '@codemirror/view'
 import { indentService, indentUnit } from '@codemirror/language'
-import { vim } from '@replit/codemirror-vim'
-import { createEffect, createSignal, on, onCleanup, onMount } from 'solid-js'
+import { getCM, vim } from '@replit/codemirror-vim'
+import { Show, createEffect, createSignal, on, onCleanup, onMount } from 'solid-js'
 import { applyVimrc } from '../lib/vim/apply'
 import type { TreeStore } from '../stores/tree'
 import type { VimSettings } from '../stores/vim'
@@ -59,6 +59,23 @@ export function TreeEditor(props: { store: TreeStore; vimSettings: VimSettings }
   let view: EditorView | undefined
   const vimSlot = new Compartment()
   const [lines, setLines] = createSignal(0)
+  // vim の現在モード（NORMAL / INSERT / VISUAL など）。vim OFF の間は使わない
+  const [vimMode, setVimMode] = createSignal('normal')
+  let detachModeListener: (() => void) | undefined
+
+  /** vim 拡張を作り直すたびに CodeMirror アダプタも作り直されるので、モード変更の購読を張り直す */
+  const watchVimMode = () => {
+    detachModeListener?.()
+    detachModeListener = undefined
+    const cm = view && getCM(view)
+    if (!cm) return
+    const onChange = (e: { mode: string; subMode?: string }) => {
+      setVimMode(e.subMode ? `${e.mode} ${e.subMode === 'linewise' ? 'line' : 'block'}` : e.mode)
+    }
+    cm.on('vim-mode-change', onChange)
+    detachModeListener = () => cm.off('vim-mode-change', onChange)
+    setVimMode(cm.state.vim?.insertMode ? 'insert' : cm.state.vim?.visualMode ? 'visual' : 'normal')
+  }
 
   const countLines = (text: string) => (text ? text.split('\n').length : 0)
 
@@ -95,7 +112,10 @@ export function TreeEditor(props: { store: TreeStore; vimSettings: VimSettings }
     })
   })
 
-  onCleanup(() => view?.destroy())
+  onCleanup(() => {
+    detachModeListener?.()
+    view?.destroy()
+  })
 
   // vim モードの切り替え。マウント直後（view 作成後）にも実行され、以降は設定変更のたびに vimrc を再適用する
   createEffect(
@@ -105,6 +125,7 @@ export function TreeEditor(props: { store: TreeStore; vimSettings: VimSettings }
         if (!view) return
         view.dispatch({ effects: vimSlot.reconfigure(enabled ? vimExt() : []) })
         if (enabled) applyVimrc(view, vimrc)
+        watchVimMode()
       },
     ),
   )
@@ -112,7 +133,14 @@ export function TreeEditor(props: { store: TreeStore; vimSettings: VimSettings }
   return (
     <section class="glass pane editor-pane">
       <div class="pane-header">
-        <h2>入力{props.vimSettings.enabled() ? ' · VIM' : ''}</h2>
+        <h2>
+          入力
+          <Show when={props.vimSettings.enabled()}>
+            <span class="vim-mode" data-mode={vimMode().split(' ')[0]}>
+              -- {vimMode().toUpperCase()} --
+            </span>
+          </Show>
+        </h2>
         <span class="pane-meta">{lines()} 行</span>
       </div>
       <div class="editor" ref={host} />
