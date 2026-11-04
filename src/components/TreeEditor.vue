@@ -45,8 +45,10 @@ const theme = EditorView.theme({
   '&': { height: '100%', background: 'transparent', color: 'var(--ink)', font: 'var(--font-code)' },
   '&.cm-focused': { outline: 'none' },
   '.cm-scroller': { font: 'inherit', lineHeight: 'inherit', overflow: 'auto' },
-  '.cm-content': { padding: 'var(--pane-pad)', caretColor: 'var(--accent)' },
-  '.cm-line': { padding: 0 },
+  // 左右の余白は .cm-line 側に持たせる。CodeMirror は選択範囲の背景を .cm-line の padding の内側に描くため、
+  // .cm-content に左右 padding を付けると visual line モード等で背景が余白まではみ出す
+  '.cm-content': { padding: '10px 0 24px', caretColor: 'var(--accent)' },
+  '.cm-line': { padding: '0 24px' },
   '.cm-cursor': { borderLeftColor: 'var(--accent)' },
   '.cm-fat-cursor': { background: 'color-mix(in oklch, var(--accent) 70%, transparent) !important', color: 'white !important' },
   '&:not(.cm-focused) .cm-fat-cursor': { background: 'none !important', outline: '1px solid var(--accent)', color: 'inherit !important' },
