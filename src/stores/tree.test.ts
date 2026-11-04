@@ -1,9 +1,12 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
-import { createRoot } from 'solid-js'
+import { effectScope } from 'vue'
 import { createTreeStore } from './tree'
 import { encodeText } from '../lib/url-state/encode'
 
-const make = () => createRoot((dispose) => ({ s: createTreeStore(), dispose }))
+const make = () => {
+  const scope = effectScope()
+  return { s: scope.run(() => createTreeStore())!, dispose: () => scope.stop() }
+}
 
 describe('createTreeStore', () => {
   const replaceState = vi.fn()
@@ -24,16 +27,16 @@ describe('createTreeStore', () => {
   it('URL hash から初期テキストを復元し、tree を導出する', () => {
     loc.hash = `#text=${encodeText('a\n  b')}`
     const { s, dispose } = make()
-    expect(s.text()).toBe('a\n  b')
-    expect(s.tree()).toHaveLength(1)
+    expect(s.text.value).toBe('a\n  b')
+    expect(s.tree.value).toHaveLength(1)
     dispose()
   })
 
   it('テキスト変更で tree が更新される', () => {
     const { s, dispose } = make()
-    expect(s.tree()).toEqual([])
+    expect(s.tree.value).toEqual([])
     s.setText('x/')
-    expect(s.tree().map((n) => n.name)).toEqual(['x'])
+    expect(s.tree.value.map((n) => n.name)).toEqual(['x'])
     dispose()
   })
 

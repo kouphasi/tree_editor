@@ -5,7 +5,9 @@
   "type": "module",
   "scripts": {
     "dev": "vite",
-    "build": "tsc --noEmit && vite build",
+    "typecheck": "tsc --runExternalCode --noEmit -p tsconfig.json",
+    "lint": "vize lint --preset essential src",
+    "build": "npm run typecheck && vite build",
     "preview": "vite preview",
     "test": "vitest run",
     "deploy": "npm run build && wrangler deploy"
@@ -16,14 +18,15 @@
     "@codemirror/view": "^6.43.15",
     "@replit/codemirror-vim": "^6.4.0",
     "lz-string": "^1.5.0",
-    "solid-js": "^1.9.15"
+    "vue": "^3.6.0-rc.14"
   },
   "devDependencies": {
     "@types/node": "^26.6.4",
-    "typescript": "^7.0.2",
+    "@vizejs/vite-plugin": "^0.671.0",
+    "typescript": "^7.1.0-beta",
     "vite": "^8.3.2",
-    "vite-plugin-solid": "^2.11.14",
     "vitest": "^5.0.3",
+    "vize": "^0.671.0",
     "wrangler": "^4.147.0"
   }
 }
