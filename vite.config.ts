@@ -1,7 +1,7 @@
 import { defineConfig } from 'vitest/config'
-import solid from 'vite-plugin-solid'
+import vize from '@vizejs/vite-plugin'
 
 export default defineConfig({
-  plugins: [solid()],
+  plugins: [vize({ vapor: true })],
   test: { environment: 'node' },
 })

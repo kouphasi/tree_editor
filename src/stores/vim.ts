@@ -1,4 +1,4 @@
-import { createSignal } from 'solid-js'
+import { computed, shallowRef } from 'vue'
 
 const KEY_ENABLED = 'tree-editor:vim'
 const KEY_VIMRC = 'tree-editor:vimrc'
@@ -21,17 +21,17 @@ function write(key: string, value: string) {
 
 /** vim モードの ON/OFF と vimrc 本文。localStorage に永続化する */
 export function createVimSettings() {
-  const [enabled, setEnabledSignal] = createSignal(read(KEY_ENABLED) === '1')
-  const [vimrc, setVimrcSignal] = createSignal(read(KEY_VIMRC) ?? '')
+  const enabled = shallowRef(read(KEY_ENABLED) === '1')
+  const vimrc = shallowRef(read(KEY_VIMRC) ?? '')
   return {
-    enabled,
-    vimrc,
+    enabled: computed(() => enabled.value),
+    vimrc: computed(() => vimrc.value),
     setEnabled(value: boolean) {
-      setEnabledSignal(value)
+      enabled.value = value
       write(KEY_ENABLED, value ? '1' : '0')
     },
     setVimrc(value: string) {
-      setVimrcSignal(value)
+      vimrc.value = value
       write(KEY_VIMRC, value)
     },
   }
