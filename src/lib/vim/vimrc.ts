@@ -58,7 +58,10 @@ function parseLeaderValue(raw: string): string | null {
   if (quoted[1] === '"') {
     // ダブルクォート内の "\<Space>" 等のキー表記
     const key = body.match(/^\\(<[^>]+>)$/)
-    if (key) return key[1].toLowerCase() === '<space>' ? ' ' : key[1]
+    if (key) {
+      const k = normalizeKeyNotation(key[1])
+      return k === '<Space>' ? ' ' : k
+    }
     return body.replace(/\\\\/g, '\\')
   }
   return body
@@ -170,7 +173,8 @@ export function parseVimrc(source: string): ParsedVimrc {
         args = args.replace(/<leader>/gi, leaderKeyName(leader))
       }
     }
-    if (/map$/.test(name)) args = normalizeKeyNotation(args)
+    // unmap も含め、マップ系コマンドはキー表記を揃える
+    if (name.endsWith('map')) args = normalizeKeyNotation(args)
     commands.push(`${name} ${args}`.trim())
   }
 
