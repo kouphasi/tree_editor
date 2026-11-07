@@ -6,6 +6,7 @@ import { indentService, indentUnit } from '@codemirror/language'
 import { getCM, vim } from '@replit/codemirror-vim'
 import { onBeforeUnmount, onMounted, shallowRef, useTemplateRef, watch } from 'vue'
 import { applyVimrc } from '../lib/vim/apply'
+import { isIdleNormalMode } from '../lib/vim/escape'
 import type { TreeStore } from '../stores/tree'
 import type { VimSettings } from '../stores/vim'
 
@@ -80,6 +81,21 @@ function watchVimMode() {
   vimMode.value = cm.state.vim?.insertMode ? 'insert' : cm.state.vim?.visualMode ? 'visual' : 'normal'
 }
 
+/**
+ * vim ON のときの Esc。ノーマルモード（入力途中のコマンド無し）のときだけフォーカスを外す。
+ * それ以外（INSERT / VISUAL / オペレータ待ち等）は vim に処理させ、フォーカスは保ったままノーマルモードへ戻す。
+ * vim のキーハンドラより先に判定したいので contentDOM の capture フェーズで受ける。
+ */
+function onEditorKeydown(e: KeyboardEvent) {
+  if (e.key !== 'Escape' || e.isComposing || e.ctrlKey || e.altKey || e.metaKey || e.shiftKey) return
+  if (!view || !props.vimSettings.enabled.value) return
+  const cm = getCM(view)
+  if (!cm || !isIdleNormalMode(cm.state.vim)) return
+  e.preventDefault()
+  e.stopPropagation()
+  view.contentDOM.blur()
+}
+
 const countLines = (text: string) => (text ? text.split('\n').length : 0)
 const lines = shallowRef(countLines(props.store.text.value))
 
@@ -120,11 +136,13 @@ onMounted(() => {
       ],
     }),
   })
+  view.contentDOM.addEventListener('keydown', onEditorKeydown, true)
   syncVim(props.vimSettings.enabled.value, props.vimSettings.vimrc.value)
 })
 
 onBeforeUnmount(() => {
   detachModeListener?.()
+  view?.contentDOM.removeEventListener('keydown', onEditorKeydown, true)
   view?.destroy()
 })
 
