@@ -64,6 +64,44 @@ function parseLeaderValue(raw: string): string | null {
   return body
 }
 
+/**
+ * キー表記の正規名（小文字化した名前 → エミュレーション側が使う表記）。
+ * Vim 本体は `<esc>` `<ESC>` `<Esc>` を同一視するが、エミュレーション側は大文字小文字を区別して
+ * `<Esc>` 等と文字列比較するため、vimrc の表記をここで揃える
+ */
+const KEY_NAMES: Record<string, string> = {
+  esc: 'Esc', escape: 'Esc',
+  cr: 'CR', return: 'CR', enter: 'CR',
+  bs: 'BS', backspace: 'BS',
+  del: 'Del', delete: 'Del',
+  ins: 'Ins', insert: 'Ins',
+  tab: 'Tab', space: 'Space', lt: 'lt',
+  left: 'Left', right: 'Right', up: 'Up', down: 'Down',
+  home: 'Home', end: 'End', pageup: 'PageUp', pagedown: 'PageDown',
+}
+
+/** `<c-x>` `<ESC>` `<s-tab>` などを `<C-x>` `<Esc>` `<S-Tab>` の正規表記にする。未知の表記はそのまま残す */
+export function normalizeKeyNotation(keys: string): string {
+  return keys.replace(/<((?:[A-Za-z]-)*)([^<>\s]+?)>/g, (whole, mods: string, name: string) => {
+    const modList = mods ? mods.slice(0, -1).split('-').map((m) => m.toUpperCase()) : []
+    if (modList.some((m) => !'CSAM'.includes(m))) return whole
+    let key: string
+    if (name.length === 1) {
+      if (modList.length === 0) return whole
+      // <C-A> と <C-a> は Vim では同じキー。イベント側は Shift なしの小文字で届く
+      key = modList.includes('S') ? name : name.toLowerCase()
+    } else {
+      const lower = name.toLowerCase()
+      if (lower in KEY_NAMES) key = KEY_NAMES[lower]
+      else if (/^f\d{1,2}$/.test(lower)) key = lower.toUpperCase()
+      else return whole
+    }
+    // イベント側は C- A- M- S- の順で修飾子を付ける
+    const order = ['C', 'A', 'M', 'S'].filter((m) => modList.includes(m))
+    return `<${order.map((m) => `${m}-`).join('')}${key}>`
+  })
+}
+
 function leaderKeyName(leader: string): string {
   return leader === ' ' ? '<Space>' : leader
 }
@@ -132,6 +170,7 @@ export function parseVimrc(source: string): ParsedVimrc {
         args = args.replace(/<leader>/gi, leaderKeyName(leader))
       }
     }
+    if (/map$/.test(name)) args = normalizeKeyNotation(args)
     commands.push(`${name} ${args}`.trim())
   }
 

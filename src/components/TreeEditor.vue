@@ -3,7 +3,7 @@ import { Compartment, EditorState } from '@codemirror/state'
 import { indentLess, indentMore, history, historyKeymap, defaultKeymap } from '@codemirror/commands'
 import { EditorView, drawSelection, keymap, placeholder } from '@codemirror/view'
 import { indentService, indentUnit } from '@codemirror/language'
-import { vim } from '@replit/codemirror-vim'
+import { getCM, vim } from '@replit/codemirror-vim'
 import { onBeforeUnmount, onMounted, shallowRef, useTemplateRef, watch } from 'vue'
 import { applyVimrc } from '../lib/vim/apply'
 import type { TreeStore } from '../stores/tree'
@@ -45,8 +45,10 @@ const theme = EditorView.theme({
   '&': { height: '100%', background: 'transparent', color: 'var(--ink)', font: 'var(--font-code)' },
   '&.cm-focused': { outline: 'none' },
   '.cm-scroller': { font: 'inherit', lineHeight: 'inherit', overflow: 'auto' },
-  '.cm-content': { padding: 'var(--pane-pad)', caretColor: 'var(--accent)' },
-  '.cm-line': { padding: 0 },
+  // 左右の余白は .cm-line 側に持たせる。CodeMirror は選択範囲の背景を .cm-line の padding の内側に描くため、
+  // .cm-content に左右 padding を付けると visual line モード等で背景が余白まではみ出す
+  '.cm-content': { padding: '10px 0 24px', caretColor: 'var(--accent)' },
+  '.cm-line': { padding: '0 24px' },
   '.cm-cursor': { borderLeftColor: 'var(--accent)' },
   '.cm-fat-cursor': { background: 'color-mix(in oklch, var(--accent) 70%, transparent) !important', color: 'white !important' },
   '&:not(.cm-focused) .cm-fat-cursor': { background: 'none !important', outline: '1px solid var(--accent)', color: 'inherit !important' },
@@ -60,6 +62,23 @@ const theme = EditorView.theme({
 const host = useTemplateRef<HTMLDivElement>('host')
 let view: EditorView | undefined
 const vimSlot = new Compartment()
+// vim の現在モード（NORMAL / INSERT / VISUAL など）。vim OFF の間は使わない
+const vimMode = shallowRef('normal')
+let detachModeListener: (() => void) | undefined
+
+/** vim 拡張を作り直すたびに CodeMirror アダプタも作り直されるので、モード変更の購読を張り直す */
+function watchVimMode() {
+  detachModeListener?.()
+  detachModeListener = undefined
+  const cm = view && getCM(view)
+  if (!cm) return
+  const onChange = (e: { mode: string; subMode?: string }) => {
+    vimMode.value = e.subMode ? `${e.mode} ${e.subMode === 'linewise' ? 'line' : 'block'}` : e.mode
+  }
+  cm.on('vim-mode-change', onChange)
+  detachModeListener = () => cm.off('vim-mode-change', onChange)
+  vimMode.value = cm.state.vim?.insertMode ? 'insert' : cm.state.vim?.visualMode ? 'visual' : 'normal'
+}
 
 const countLines = (text: string) => (text ? text.split('\n').length : 0)
 const lines = shallowRef(countLines(props.store.text.value))
@@ -69,6 +88,7 @@ function syncVim(enabled: boolean, vimrc: string) {
   if (!view) return
   view.dispatch({ effects: vimSlot.reconfigure(enabled ? vimExt() : []) })
   if (enabled) applyVimrc(view, vimrc)
+  watchVimMode()
 }
 
 onMounted(() => {
@@ -103,7 +123,10 @@ onMounted(() => {
   syncVim(props.vimSettings.enabled.value, props.vimSettings.vimrc.value)
 })
 
-onBeforeUnmount(() => view?.destroy())
+onBeforeUnmount(() => {
+  detachModeListener?.()
+  view?.destroy()
+})
 
 // 設定変更のたびに vim の有効/無効と vimrc を反映する
 watch(
@@ -115,7 +138,12 @@ watch(
 <template>
   <section class="glass pane editor-pane">
     <div class="pane-header">
-      <h2>入力{{ props.vimSettings.enabled.value ? ' · VIM' : '' }}</h2>
+      <h2>
+        入力
+        <span v-if="props.vimSettings.enabled.value" class="vim-mode" :data-mode="vimMode.split(' ')[0]">
+          -- {{ vimMode.toUpperCase() }} --
+        </span>
+      </h2>
       <span class="pane-meta">{{ lines }} 行</span>
     </div>
     <div ref="host" class="editor"></div>
