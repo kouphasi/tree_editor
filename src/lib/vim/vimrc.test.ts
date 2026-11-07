@@ -116,6 +116,11 @@ describe('キー表記の正規化', () => {
     expect(normalizeKeyNotation('<a>')).toBe('<a>')
   })
 
+  it('mapleader のキー表記も正規化する', () => {
+    expect(parseVimrc('let mapleader = "\\<SPACE>"\nnmap <leader>w :w<cr>').leaderKey).toBe('<Space>')
+    expect(parseVimrc('let mapleader = "\\<tab>"\nnmap <leader>w :w<cr>').commands).toEqual(['nmap <Tab>w :w<CR>'])
+  })
+
   it('set の値は変更しない', () => {
     expect(parseVimrc('set foo=<esc>').commands).toEqual(['set foo=<esc>'])
   })
