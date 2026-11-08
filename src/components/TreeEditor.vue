@@ -47,8 +47,8 @@ const theme = EditorView.theme({
   '.cm-scroller': { font: 'inherit', lineHeight: 'inherit', overflow: 'auto' },
   // 左右の余白は .cm-line 側に持たせる。CodeMirror は選択範囲の背景を .cm-line の padding の内側に描くため、
   // .cm-content に左右 padding を付けると visual line モード等で背景が余白まではみ出す
-  '.cm-content': { padding: '10px 0 24px', caretColor: 'var(--accent)' },
-  '.cm-line': { padding: '0 24px' },
+  '.cm-content': { padding: 'var(--pane-pad-top) 0 var(--pane-pad-bottom)', caretColor: 'var(--accent)' },
+  '.cm-line': { padding: '0 var(--pane-pad-x)' },
   '.cm-cursor': { borderLeftColor: 'var(--accent)' },
   '.cm-fat-cursor': { background: 'color-mix(in oklch, var(--accent) 70%, transparent) !important', color: 'white !important' },
   '&:not(.cm-focused) .cm-fat-cursor': { background: 'none !important', outline: '1px solid var(--accent)', color: 'inherit !important' },
@@ -72,12 +72,11 @@ function watchVimMode() {
   detachModeListener = undefined
   const cm = view && getCM(view)
   if (!cm) return
-  const onChange = (e: { mode: string; subMode?: string }) => {
-    vimMode.value = e.subMode ? `${e.mode} ${e.subMode === 'linewise' ? 'line' : 'block'}` : e.mode
-  }
+  // vim 拡張自身のリスナーが先に state.vim.mode を "visual line" 等へ更新しているので、それを読むだけでよい
+  const onChange = () => (vimMode.value = cm.state.vim?.mode ?? 'normal')
   cm.on('vim-mode-change', onChange)
   detachModeListener = () => cm.off('vim-mode-change', onChange)
-  vimMode.value = cm.state.vim?.insertMode ? 'insert' : cm.state.vim?.visualMode ? 'visual' : 'normal'
+  onChange()
 }
 
 const countLines = (text: string) => (text ? text.split('\n').length : 0)
