@@ -60,7 +60,7 @@ body { margin: 0; background: var(--bg); color: var(--ink); font-family: var(--f
 }
 
 /* ツールバー */
-.toolbar, .hints { flex: none; display: flex; justify-content: center; }
+.toolbar { flex: none; display: flex; justify-content: center; }
 .toolbar-pill {
   display: flex;
   align-items: center;
@@ -169,24 +169,14 @@ h2 { margin: 0; font-size: 12px; font-weight: 600; letter-spacing: 0.06em; color
 .tree-label.is-dir { color: var(--ink); font-weight: 600; }
 .empty { margin: 0; font-size: 13px; color: var(--ink-muted); }
 
-/* キー操作のヒント */
-.hints-pill {
-  display: flex;
-  flex-wrap: wrap;
-  justify-content: center;
-  align-items: center;
-  gap: 6px 18px;
-  min-height: 40px;
-  margin: 0;
-  padding: 8px 18px;
-  border-radius: 20px;
-  list-style: none;
-  font-size: 12px;
-  color: var(--ink-2);
-  --glass-inner: 0 0 transparent;
-  --glass-shadow: 0 8px 24px rgba(var(--shadow-tint), 0.12);
+/* キー操作ヘルプ */
+.btn-help { display: inline-flex; align-items: center; gap: 7px; }
+.help-modal { width: min(420px, 100%); }
+.help-list {
+  display: grid; grid-template-columns: auto 1fr; align-items: center; gap: 10px 14px;
+  margin: 0; font-size: 13px; color: var(--ink-2);
 }
-.hints-pill li { display: flex; align-items: center; gap: 7px; }
+.help-list dd { margin: 0; }
 kbd {
   padding: 2px 7px;
   border-radius: 6px;
