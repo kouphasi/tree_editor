@@ -1,6 +1,5 @@
 <script setup lang="ts" vapor>
 import { computed } from 'vue'
-import KeyHints from './components/KeyHints.vue'
 import AppToolbar from './components/AppToolbar.vue'
 import TreeEditor from './components/TreeEditor.vue'
 import TreePreview from './components/TreePreview.vue'
@@ -22,6 +21,5 @@ const text = computed(() => linesToText(lines.value))
       <TreeEditor :store="store" :vim-settings="vimSettings" />
       <TreePreview :lines="lines" />
     </main>
-    <KeyHints />
   </div>
 </template>
