@@ -19,3 +19,6 @@ tree editor by Vue 3.6 (Vapor Mode)
 - コメント行（`"` 始まり）と継続行（`\` 始まり）
 
 プラグイン・関数・`autocmd`・`syntax` など Vim script 本体は動作しません。未対応の行はダイアログ内に一覧表示されます。
+
+数字キー（`1`〜`9`）も `nnoremap 1 0` のようにマップできます。この場合そのキーはカウントとしては使えなくなります（例: `12G` は `1` のマップ → `2G` になる）。
+これは `@replit/codemirror-vim-core` に当てたパッチ（`patches/`）で実現しており、`npm install` / `npm ci` 時に `patch-package` が自動適用します。

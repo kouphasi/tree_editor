@@ -1,0 +1,36 @@
+diff --git a/node_modules/@replit/codemirror-vim-core/vim.js b/node_modules/@replit/codemirror-vim-core/vim.js
+index 3cafa6b..8b5f760 100644
+--- a/node_modules/@replit/codemirror-vim-core/vim.js
++++ b/node_modules/@replit/codemirror-vim-core/vim.js
+@@ -1000,12 +1000,18 @@ export function initVim(CM) {
+ 
+         vim.inputState.keyBuffer.push(key);
+         var keys = vim.inputState.keyBuffer.join("");
+-        if (/^[1-9]\d*$/.test(keys)) { return true; }
+-
+-        var keysMatcher = /^(\d*)(.*)$/.exec(keys);
+-        if (!keysMatcher) { clearInputState(cm); return false; }
+         var context = vim.visualMode ? 'visual' :
+                                         'normal';
++        // [tree_editor patch] 1-9 で始まるキー列でも、それで始まるユーザー定義マップ
++        // （例: nnoremap 1 0）があればカウントではなくマップとして扱う
++        var digitMapped = /^[1-9]/.test(keys) && defaultKeymap.some(function(m) {
++          return typeof m.keys == 'string' && m.keys.indexOf(keys) == 0 &&
++            (!m.context || m.context == context);
++        });
++        if (!digitMapped && /^[1-9]\d*$/.test(keys)) { return true; }
++
++        var keysMatcher = digitMapped ? [keys, '', keys] : /^(\d*)(.*)$/.exec(keys);
++        if (!keysMatcher) { clearInputState(cm); return false; }
+         var mainKey = keysMatcher[2] || keysMatcher[1];
+         if (vim.inputState.operatorShortcut && vim.inputState.operatorShortcut.slice(-1) == mainKey) {
+           // multikey operators act linewise by repeating only the last character
+@@ -1021,7 +1027,7 @@ export function initVim(CM) {
+         vim.expectLiteralNext = false;
+ 
+         vim.inputState.keyBuffer.length = 0;
+-        keysMatcher = /^(\d*)(.*)$/.exec(keys);
++        keysMatcher = digitMapped ? [keys, '', keys] : /^(\d*)(.*)$/.exec(keys);
+         if (keysMatcher && keysMatcher[1] && keysMatcher[1] != '0') {
+           vim.inputState.pushRepeatDigit(keysMatcher[1]);
+         }
