@@ -1,5 +1,6 @@
 import { getCM, Vim } from '@replit/codemirror-vim'
 import type { EditorView } from '@codemirror/view'
+import { installClipboardSync, resetClipboardOption } from './clipboard'
 import { parseVimrc } from './vimrc'
 
 /**
@@ -9,7 +10,9 @@ import { parseVimrc } from './vimrc'
 export function applyVimrc(view: EditorView, source: string): string[] {
   const cm = getCM(view)
   if (!cm) return []
+  installClipboardSync()
   Vim.mapclear()
+  resetClipboardOption()
   const parsed = parseVimrc(source)
   // 既定で割り当てのあるキー（<Space> や , など）を leader にすると、完全一致が優先されて
   // <leader>x のような複数キーのマップに到達できない。leader キー自体の既定割り当てを外しておく
