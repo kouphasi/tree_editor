@@ -24,6 +24,5 @@ const title = computed(() => `テーマ: ${LABELS[mode.value]}（クリックで
         <path d="M12 3a9 9 0 0 1 0 18z" fill="currentColor" />
       </template>
     </svg>
-    {{ LABELS[mode] }}
   </button>
 </template>

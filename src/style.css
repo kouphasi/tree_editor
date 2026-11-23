@@ -194,8 +194,9 @@ h2 { margin: 0; font-size: 12px; font-weight: 600; letter-spacing: 0.06em; color
 .empty { margin: 0; font-size: 13px; color: var(--ink-muted); }
 
 /* キー操作ヘルプ */
-.btn-help, .btn-theme { display: inline-flex; align-items: center; gap: 7px; }
-.btn-theme svg { flex: none; }
+.btn-help { display: inline-flex; align-items: center; gap: 7px; }
+/* アイコンだけの丸ボタン。状態は title / aria-label で伝える */
+.btn-theme { display: inline-grid; place-items: center; width: 36px; padding: 0; }
 .help-modal { width: min(420px, 100%); }
 .help-list {
   display: grid; grid-template-columns: auto 1fr; align-items: center; gap: 10px 14px;
