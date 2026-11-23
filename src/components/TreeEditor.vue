@@ -54,7 +54,7 @@ const theme = EditorView.theme({
   '&:not(.cm-focused) .cm-fat-cursor': { background: 'none !important', outline: '1px solid var(--accent)', color: 'inherit !important' },
   '.cm-selectionBackground': { background: 'color-mix(in oklch, var(--accent) 22%, transparent) !important' },
   '.cm-panels': { background: 'transparent', color: 'var(--ink-2)', font: '500 12px var(--font-mono)' },
-  '.cm-panels-bottom': { borderTop: '1px solid rgba(16, 19, 26, 0.08)' },
+  '.cm-panels-bottom': { borderTop: '1px solid var(--divider)' },
   '.cm-vim-panel': { padding: '4px 24px' },
   '.cm-vim-panel input': { background: 'transparent', color: 'inherit', font: 'inherit', border: 'none', outline: 'none' },
 })
