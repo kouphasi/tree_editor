@@ -14,6 +14,59 @@
   --pane-pad-bottom: 24px;
   --pane-pad: var(--pane-pad-top) var(--pane-pad-x) var(--pane-pad-bottom);
   --shadow-tint: 30, 40, 80;
+  --on-accent: #fff;
+  --btn-bg: rgba(255, 255, 255, 0.45);
+  --btn-bg-hover: rgba(255, 255, 255, 0.7);
+  --btn-edge: rgba(255, 255, 255, 0.7);
+  --btn-highlight: rgba(255, 255, 255, 0.9);
+  --primary-bg: rgba(16, 19, 26, 0.88);
+  --primary-ink: #fff;
+  --primary-shadow: 0 4px 12px rgba(16, 19, 26, 0.25);
+  --chip-bg: rgba(16, 19, 26, 0.06);
+  --scrim: rgba(16, 19, 26, 0.28);
+  --field-bg: rgba(255, 255, 255, 0.6);
+  --field-edge: rgba(16, 19, 26, 0.12);
+  --kbd-bg: rgba(255, 255, 255, 0.7);
+  --kbd-edge: rgba(16, 19, 26, 0.12);
+  --divider: rgba(16, 19, 26, 0.08);
+  --placeholder: #a8a7a0;
+  --blob-1: oklch(0.9 0.035 250);
+  --blob-2: oklch(0.92 0.025 220);
+  --glass-fallback: rgba(255, 255, 255, 0.85);
+  color-scheme: light;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --bg: #0d1015;
+    --ink: #e8ebf2;
+    --ink-2: #c3c8d4;
+    --ink-3: #9da4b3;
+    --ink-muted: #8a91a0;
+    --rule: #5f6678;
+    --accent: oklch(0.72 0.14 255);
+    --shadow-tint: 0, 0, 0;
+    --on-accent: #0b0d12;
+    --btn-bg: rgba(255, 255, 255, 0.06);
+    --btn-bg-hover: rgba(255, 255, 255, 0.12);
+    --btn-edge: rgba(255, 255, 255, 0.1);
+    --btn-highlight: rgba(255, 255, 255, 0.08);
+    --primary-bg: rgba(232, 235, 242, 0.92);
+    --primary-ink: #10131a;
+    --primary-shadow: 0 4px 12px rgba(0, 0, 0, 0.4);
+    --chip-bg: rgba(255, 255, 255, 0.08);
+    --scrim: rgba(0, 0, 0, 0.5);
+    --field-bg: rgba(0, 0, 0, 0.25);
+    --field-edge: rgba(255, 255, 255, 0.12);
+    --kbd-bg: rgba(255, 255, 255, 0.1);
+    --kbd-edge: rgba(0, 0, 0, 0.4);
+    --divider: rgba(255, 255, 255, 0.08);
+    --placeholder: #596071;
+    --blob-1: oklch(0.34 0.07 260);
+    --blob-2: oklch(0.3 0.05 220);
+    --glass-fallback: rgba(24, 28, 37, 0.92);
+    color-scheme: dark;
+  }
 }
 
 * { box-sizing: border-box; }
@@ -41,8 +94,8 @@ body { margin: 0; background: var(--bg); color: var(--ink); font-family: var(--f
   border-radius: 50%;
   filter: blur(120px);
 }
-.backdrop::before { width: 900px; height: 700px; left: -200px; top: -300px; background: oklch(0.9 0.035 250); opacity: 0.8; }
-.backdrop::after { width: 800px; height: 600px; right: -240px; bottom: -280px; background: oklch(0.92 0.025 220); opacity: 0.7; }
+.backdrop::before { width: 900px; height: 700px; left: -200px; top: -300px; background: var(--blob-1); opacity: 0.8; }
+.backdrop::after { width: 800px; height: 600px; right: -240px; bottom: -280px; background: var(--blob-2); opacity: 0.7; }
 
 /* Liquid Glass: 半透明 + 背景ぼかし + 上端のハイライトと浮遊影。各要素は --glass-* だけを上書きする */
 .glass {
@@ -76,25 +129,25 @@ h1 { margin: 0 8px 0 0; font-size: 14px; font-weight: 600; letter-spacing: -0.01
 .btn {
   height: 36px;
   padding: 0 14px;
-  border: 1px solid rgba(255, 255, 255, 0.7);
+  border: 1px solid var(--btn-edge);
   border-radius: 18px;
-  background: rgba(255, 255, 255, 0.45);
-  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.9);
+  background: var(--btn-bg);
+  box-shadow: inset 0 1px 0 var(--btn-highlight);
   font: 500 12.5px var(--font-sans);
   color: var(--ink);
   white-space: nowrap;
   cursor: pointer;
   transition: background 0.15s;
 }
-.btn:hover { background: rgba(255, 255, 255, 0.7); }
+.btn:hover { background: var(--btn-bg-hover); }
 .btn-primary {
   min-width: 92px;
   padding: 0 16px;
   border: none;
-  background: rgba(16, 19, 26, 0.88);
-  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.25), 0 4px 12px rgba(16, 19, 26, 0.25);
+  background: var(--primary-bg);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.25), var(--primary-shadow);
   font-weight: 600;
-  color: #fff;
+  color: var(--primary-ink);
 }
 .btn-primary:hover { background: var(--ink); }
 .btn:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
@@ -125,9 +178,9 @@ main { flex: 1; min-height: 0; display: grid; grid-template-columns: minmax(0, 1
 }
 .pane-header { flex: none; display: flex; align-items: center; justify-content: space-between; padding: 18px 24px 6px; }
 h2 { margin: 0; font-size: 12px; font-weight: 600; letter-spacing: 0.06em; color: var(--ink-2); }
-.vim-mode { margin-left: 10px; padding: 2px 8px; border-radius: 999px; font: 600 11px var(--font-mono); letter-spacing: 0.04em; color: var(--ink-2); background: rgba(16, 19, 26, 0.06); }
+.vim-mode { margin-left: 10px; padding: 2px 8px; border-radius: 999px; font: 600 11px var(--font-mono); letter-spacing: 0.04em; color: var(--ink-2); background: var(--chip-bg); }
 .vim-mode:not([data-mode='normal']) { color: #fff; }
-.vim-mode[data-mode='insert'] { background: var(--accent); }
+.vim-mode[data-mode='insert'] { background: var(--accent); color: var(--on-accent); }
 .vim-mode[data-mode='visual'] { background: #b26a00; }
 .vim-mode[data-mode='replace'] { background: #c0392b; }
 .pane-meta { font-size: 11.5px; color: var(--ink-3); }
@@ -135,14 +188,14 @@ h2 { margin: 0; font-size: 12px; font-weight: 600; letter-spacing: 0.06em; color
 
 .editor { flex: 1; min-height: 0; overflow: hidden; }
 .editor .cm-editor { height: 100%; }
-.editor-placeholder { color: #a8a7a0; white-space: pre; }
+.editor-placeholder { color: var(--placeholder); white-space: pre; }
 
 /* Vim 設定ダイアログ */
-.btn.is-on { background: var(--accent); color: #fff; }
+.btn.is-on { background: var(--accent); color: var(--on-accent); }
 .modal-backdrop {
   position: fixed; inset: 0; z-index: 10;
   display: grid; place-items: center; padding: 16px;
-  background: rgba(16, 19, 26, 0.28);
+  background: var(--scrim);
 }
 .modal {
   display: flex; flex-direction: column; gap: 14px;
@@ -154,8 +207,8 @@ h2 { margin: 0; font-size: 12px; font-weight: 600; letter-spacing: 0.06em; color
 .modal .field { display: flex; flex-direction: column; gap: 6px; font-size: 12px; color: var(--ink-2); }
 .vimrc-input {
   min-height: 200px; padding: 12px; resize: vertical;
-  border: 1px solid rgba(16, 19, 26, 0.12); border-radius: 12px;
-  background: rgba(255, 255, 255, 0.6); color: var(--ink); font: 400 13px/1.6 var(--font-mono); tab-size: 4;
+  border: 1px solid var(--field-edge); border-radius: 12px;
+  background: var(--field-bg); color: var(--ink); font: 400 13px/1.6 var(--font-mono); tab-size: 4;
 }
 .vimrc-input:focus-visible { outline: 2px solid var(--accent); outline-offset: 1px; }
 .modal-note { margin: 0; font-size: 12px; color: var(--ink-3); }
@@ -181,15 +234,40 @@ h2 { margin: 0; font-size: 12px; font-weight: 600; letter-spacing: 0.06em; color
 kbd {
   padding: 2px 7px;
   border-radius: 6px;
-  background: rgba(255, 255, 255, 0.7);
-  box-shadow: inset 0 -1px 0 rgba(16, 19, 26, 0.12);
+  background: var(--kbd-bg);
+  box-shadow: inset 0 -1px 0 var(--kbd-edge);
   font: 500 11px var(--font-mono);
   color: var(--ink);
 }
 
 /* backdrop-filter 非対応環境では不透明寄りにして可読性を保つ */
 @supports not ((backdrop-filter: blur(1px)) or (-webkit-backdrop-filter: blur(1px))) {
-  .glass { background: rgba(255, 255, 255, 0.85); }
+  .glass { background: var(--glass-fallback); }
+}
+
+/* ダーク: ガラスは暗い半透明 + 控えめな白の縁取り。.glass と各パネルの上書き順は上と同じにする */
+@media (prefers-color-scheme: dark) {
+  .glass {
+    --glass-bg: rgba(26, 30, 40, 0.5);
+    --glass-edge: rgba(255, 255, 255, 0.1);
+    --glass-highlight: rgba(255, 255, 255, 0.1);
+    --glass-inner: inset 0 -1px 0 rgba(255, 255, 255, 0.03);
+    --glass-shadow: 0 10px 30px rgba(0, 0, 0, 0.45);
+  }
+  .editor-pane {
+    --glass-bg: rgba(22, 26, 35, 0.45);
+    --glass-edge: rgba(255, 255, 255, 0.08);
+    --glass-highlight: rgba(255, 255, 255, 0.08);
+    --glass-inner: inset 0 0 0 1px rgba(255, 255, 255, 0.02);
+    --glass-shadow: 0 24px 60px rgba(0, 0, 0, 0.5);
+  }
+  .preview-pane {
+    --glass-bg: rgba(30, 35, 46, 0.6);
+    --glass-edge: rgba(255, 255, 255, 0.1);
+    --glass-highlight: rgba(255, 255, 255, 0.12);
+    --glass-shadow: 0 24px 60px rgba(0, 0, 0, 0.5);
+  }
+  .modal { --glass-bg: rgba(24, 28, 37, 0.9); }
 }
 
 @media (max-width: 700px) {
