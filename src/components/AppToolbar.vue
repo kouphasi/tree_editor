@@ -1,10 +1,12 @@
 <script setup lang="ts" vapor>
 import { onBeforeUnmount, onMounted, shallowRef } from 'vue'
+import type { ThemeSettings } from '../stores/theme'
 import type { VimSettings } from '../stores/vim'
 import KeyHelp from './KeyHelp.vue'
+import ThemeToggle from './ThemeToggle.vue'
 import VimSettingsDialog from './VimSettings.vue'
 
-const props = defineProps<{ text: string; vimSettings: VimSettings }>()
+const props = defineProps<{ text: string; vimSettings: VimSettings; theme: ThemeSettings }>()
 
 /** クリップボードにコピーし、一定時間だけ完了表示を返す */
 function useCopy() {
@@ -44,6 +46,7 @@ const currentUrl = () => location.href
       <span class="logo" aria-hidden="true">└──</span>
       <h1>Directory Tree Editor</h1>
       <button class="btn btn-help" aria-keyshortcuts="?" @click="helpOpen = true"><kbd>?</kbd>ヘルプ</button>
+      <ThemeToggle :theme="props.theme" />
       <button class="btn" :class="{ 'is-on': props.vimSettings.enabled.value }" @click="vimOpen = true">
         Vim{{ props.vimSettings.enabled.value ? ' ON' : '' }}
       </button>

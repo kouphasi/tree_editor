@@ -1,11 +1,32 @@
 :root {
-  --bg: #eef0f3;
-  --ink: #10131a;
-  --ink-2: #343a46;
-  --ink-3: #4a5160;
-  --ink-muted: #5a6170;
-  --rule: #8a90a0;
-  --accent: oklch(0.55 0.18 255);
+  /* 配色は light-dark() で両テーマを並べて持つ。color-scheme（OS 設定 or data-theme）で切り替わる */
+  color-scheme: light dark;
+  --bg: light-dark(#eef0f3, #0d1015);
+  --ink: light-dark(#10131a, #e8ebf2);
+  --ink-2: light-dark(#343a46, #c3c8d4);
+  --ink-3: light-dark(#4a5160, #9da4b3);
+  --ink-muted: light-dark(#5a6170, #8a91a0);
+  --rule: light-dark(#8a90a0, #5f6678);
+  --accent: light-dark(oklch(0.55 0.18 255), oklch(0.72 0.14 255));
+  --on-accent: light-dark(#fff, #0b0d12);
+  --btn-bg: light-dark(rgba(255, 255, 255, 0.45), rgba(255, 255, 255, 0.06));
+  --btn-bg-hover: light-dark(rgba(255, 255, 255, 0.7), rgba(255, 255, 255, 0.12));
+  --btn-edge: light-dark(rgba(255, 255, 255, 0.7), rgba(255, 255, 255, 0.1));
+  --btn-highlight: light-dark(rgba(255, 255, 255, 0.9), rgba(255, 255, 255, 0.08));
+  --primary-bg: light-dark(rgba(16, 19, 26, 0.88), rgba(232, 235, 242, 0.92));
+  --primary-ink: light-dark(#fff, #10131a);
+  --primary-shadow: 0 4px 12px light-dark(rgba(16, 19, 26, 0.25), rgba(0, 0, 0, 0.4));
+  --chip-bg: light-dark(rgba(16, 19, 26, 0.06), rgba(255, 255, 255, 0.08));
+  --scrim: light-dark(rgba(16, 19, 26, 0.28), rgba(0, 0, 0, 0.5));
+  --field-bg: light-dark(rgba(255, 255, 255, 0.6), rgba(0, 0, 0, 0.25));
+  --field-edge: light-dark(rgba(16, 19, 26, 0.12), rgba(255, 255, 255, 0.12));
+  --kbd-bg: light-dark(rgba(255, 255, 255, 0.7), rgba(255, 255, 255, 0.1));
+  --kbd-edge: light-dark(rgba(16, 19, 26, 0.12), rgba(0, 0, 0, 0.4));
+  --divider: light-dark(rgba(16, 19, 26, 0.08), rgba(255, 255, 255, 0.08));
+  --placeholder: light-dark(#a8a7a0, #596071);
+  --blob-1: light-dark(oklch(0.9 0.035 250), oklch(0.34 0.07 260));
+  --blob-2: light-dark(oklch(0.92 0.025 220), oklch(0.3 0.05 220));
+  --glass-fallback: light-dark(rgba(255, 255, 255, 0.85), rgba(24, 28, 37, 0.92));
   --font-sans: 'IBM Plex Sans JP', system-ui, sans-serif;
   --font-mono: 'JetBrains Mono', ui-monospace, Menlo, monospace;
   --font-code: 400 14px/1.75 var(--font-mono);
@@ -13,61 +34,10 @@
   --pane-pad-x: 24px;
   --pane-pad-bottom: 24px;
   --pane-pad: var(--pane-pad-top) var(--pane-pad-x) var(--pane-pad-bottom);
-  --shadow-tint: 30, 40, 80;
-  --on-accent: #fff;
-  --btn-bg: rgba(255, 255, 255, 0.45);
-  --btn-bg-hover: rgba(255, 255, 255, 0.7);
-  --btn-edge: rgba(255, 255, 255, 0.7);
-  --btn-highlight: rgba(255, 255, 255, 0.9);
-  --primary-bg: rgba(16, 19, 26, 0.88);
-  --primary-ink: #fff;
-  --primary-shadow: 0 4px 12px rgba(16, 19, 26, 0.25);
-  --chip-bg: rgba(16, 19, 26, 0.06);
-  --scrim: rgba(16, 19, 26, 0.28);
-  --field-bg: rgba(255, 255, 255, 0.6);
-  --field-edge: rgba(16, 19, 26, 0.12);
-  --kbd-bg: rgba(255, 255, 255, 0.7);
-  --kbd-edge: rgba(16, 19, 26, 0.12);
-  --divider: rgba(16, 19, 26, 0.08);
-  --placeholder: #a8a7a0;
-  --blob-1: oklch(0.9 0.035 250);
-  --blob-2: oklch(0.92 0.025 220);
-  --glass-fallback: rgba(255, 255, 255, 0.85);
-  color-scheme: light;
 }
-
-@media (prefers-color-scheme: dark) {
-  :root {
-    --bg: #0d1015;
-    --ink: #e8ebf2;
-    --ink-2: #c3c8d4;
-    --ink-3: #9da4b3;
-    --ink-muted: #8a91a0;
-    --rule: #5f6678;
-    --accent: oklch(0.72 0.14 255);
-    --shadow-tint: 0, 0, 0;
-    --on-accent: #0b0d12;
-    --btn-bg: rgba(255, 255, 255, 0.06);
-    --btn-bg-hover: rgba(255, 255, 255, 0.12);
-    --btn-edge: rgba(255, 255, 255, 0.1);
-    --btn-highlight: rgba(255, 255, 255, 0.08);
-    --primary-bg: rgba(232, 235, 242, 0.92);
-    --primary-ink: #10131a;
-    --primary-shadow: 0 4px 12px rgba(0, 0, 0, 0.4);
-    --chip-bg: rgba(255, 255, 255, 0.08);
-    --scrim: rgba(0, 0, 0, 0.5);
-    --field-bg: rgba(0, 0, 0, 0.25);
-    --field-edge: rgba(255, 255, 255, 0.12);
-    --kbd-bg: rgba(255, 255, 255, 0.1);
-    --kbd-edge: rgba(0, 0, 0, 0.4);
-    --divider: rgba(255, 255, 255, 0.08);
-    --placeholder: #596071;
-    --blob-1: oklch(0.34 0.07 260);
-    --blob-2: oklch(0.3 0.05 220);
-    --glass-fallback: rgba(24, 28, 37, 0.92);
-    color-scheme: dark;
-  }
-}
+/* ツールバーで手動指定されたテーマ（未指定なら OS 設定に従う） */
+:root[data-theme='light'] { color-scheme: light; }
+:root[data-theme='dark'] { color-scheme: dark; }
 
 * { box-sizing: border-box; }
 html, body { height: 100%; }
@@ -99,12 +69,12 @@ body { margin: 0; background: var(--bg); color: var(--ink); font-family: var(--f
 
 /* Liquid Glass: 半透明 + 背景ぼかし + 上端のハイライトと浮遊影。各要素は --glass-* だけを上書きする */
 .glass {
-  --glass-bg: rgba(255, 255, 255, 0.38);
-  --glass-edge: rgba(255, 255, 255, 0.65);
+  --glass-bg: light-dark(rgba(255, 255, 255, 0.38), rgba(26, 30, 40, 0.5));
+  --glass-edge: light-dark(rgba(255, 255, 255, 0.65), rgba(255, 255, 255, 0.1));
   --glass-blur: 24px;
-  --glass-highlight: rgba(255, 255, 255, 0.9);
-  --glass-inner: inset 0 -1px 0 rgba(255, 255, 255, 0.25);
-  --glass-shadow: 0 10px 30px rgba(var(--shadow-tint), 0.14);
+  --glass-highlight: light-dark(rgba(255, 255, 255, 0.9), rgba(255, 255, 255, 0.1));
+  --glass-inner: inset 0 -1px 0 light-dark(rgba(255, 255, 255, 0.25), rgba(255, 255, 255, 0.03));
+  --glass-shadow: 0 10px 30px light-dark(rgba(30, 40, 80, 0.14), rgba(0, 0, 0, 0.45));
   background: var(--glass-bg);
   -webkit-backdrop-filter: blur(var(--glass-blur)) saturate(180%);
   backdrop-filter: blur(var(--glass-blur)) saturate(180%);
@@ -163,18 +133,18 @@ main { flex: 1; min-height: 0; display: grid; grid-template-columns: minmax(0, 1
   --glass-blur: 30px;
 }
 .editor-pane {
-  --glass-bg: rgba(255, 255, 255, 0.32);
-  --glass-edge: rgba(255, 255, 255, 0.6);
-  --glass-highlight: rgba(255, 255, 255, 0.85);
-  --glass-inner: inset 0 0 0 1px rgba(255, 255, 255, 0.15);
-  --glass-shadow: 0 24px 60px rgba(var(--shadow-tint), 0.16);
+  --glass-bg: light-dark(rgba(255, 255, 255, 0.32), rgba(22, 26, 35, 0.45));
+  --glass-edge: light-dark(rgba(255, 255, 255, 0.6), rgba(255, 255, 255, 0.08));
+  --glass-highlight: light-dark(rgba(255, 255, 255, 0.85), rgba(255, 255, 255, 0.08));
+  --glass-inner: inset 0 0 0 1px light-dark(rgba(255, 255, 255, 0.15), rgba(255, 255, 255, 0.02));
+  --glass-shadow: 0 24px 60px light-dark(rgba(30, 40, 80, 0.16), rgba(0, 0, 0, 0.5));
 }
 .preview-pane {
-  --glass-bg: rgba(255, 255, 255, 0.55);
-  --glass-edge: rgba(255, 255, 255, 0.75);
-  --glass-highlight: rgba(255, 255, 255, 0.95);
+  --glass-bg: light-dark(rgba(255, 255, 255, 0.55), rgba(30, 35, 46, 0.6));
+  --glass-edge: light-dark(rgba(255, 255, 255, 0.75), rgba(255, 255, 255, 0.1));
+  --glass-highlight: light-dark(rgba(255, 255, 255, 0.95), rgba(255, 255, 255, 0.12));
   --glass-inner: 0 0 transparent;
-  --glass-shadow: 0 24px 60px rgba(var(--shadow-tint), 0.18);
+  --glass-shadow: 0 24px 60px light-dark(rgba(30, 40, 80, 0.18), rgba(0, 0, 0, 0.5));
 }
 .pane-header { flex: none; display: flex; align-items: center; justify-content: space-between; padding: 18px 24px 6px; }
 h2 { margin: 0; font-size: 12px; font-weight: 600; letter-spacing: 0.06em; color: var(--ink-2); }
@@ -201,7 +171,7 @@ h2 { margin: 0; font-size: 12px; font-weight: 600; letter-spacing: 0.06em; color
   display: flex; flex-direction: column; gap: 14px;
   width: min(560px, 100%); max-height: 100%; overflow: auto;
   padding: 22px 24px; border-radius: 24px;
-  --glass-bg: rgba(255, 255, 255, 0.82);
+  --glass-bg: light-dark(rgba(255, 255, 255, 0.82), rgba(24, 28, 37, 0.9));
 }
 .modal .check { display: flex; align-items: center; gap: 8px; font-size: 13px; }
 .modal .field { display: flex; flex-direction: column; gap: 6px; font-size: 12px; color: var(--ink-2); }
@@ -224,7 +194,8 @@ h2 { margin: 0; font-size: 12px; font-weight: 600; letter-spacing: 0.06em; color
 .empty { margin: 0; font-size: 13px; color: var(--ink-muted); }
 
 /* キー操作ヘルプ */
-.btn-help { display: inline-flex; align-items: center; gap: 7px; }
+.btn-help, .btn-theme { display: inline-flex; align-items: center; gap: 7px; }
+.btn-theme svg { flex: none; }
 .help-modal { width: min(420px, 100%); }
 .help-list {
   display: grid; grid-template-columns: auto 1fr; align-items: center; gap: 10px 14px;
@@ -243,31 +214,6 @@ kbd {
 /* backdrop-filter 非対応環境では不透明寄りにして可読性を保つ */
 @supports not ((backdrop-filter: blur(1px)) or (-webkit-backdrop-filter: blur(1px))) {
   .glass { background: var(--glass-fallback); }
-}
-
-/* ダーク: ガラスは暗い半透明 + 控えめな白の縁取り。.glass と各パネルの上書き順は上と同じにする */
-@media (prefers-color-scheme: dark) {
-  .glass {
-    --glass-bg: rgba(26, 30, 40, 0.5);
-    --glass-edge: rgba(255, 255, 255, 0.1);
-    --glass-highlight: rgba(255, 255, 255, 0.1);
-    --glass-inner: inset 0 -1px 0 rgba(255, 255, 255, 0.03);
-    --glass-shadow: 0 10px 30px rgba(0, 0, 0, 0.45);
-  }
-  .editor-pane {
-    --glass-bg: rgba(22, 26, 35, 0.45);
-    --glass-edge: rgba(255, 255, 255, 0.08);
-    --glass-highlight: rgba(255, 255, 255, 0.08);
-    --glass-inner: inset 0 0 0 1px rgba(255, 255, 255, 0.02);
-    --glass-shadow: 0 24px 60px rgba(0, 0, 0, 0.5);
-  }
-  .preview-pane {
-    --glass-bg: rgba(30, 35, 46, 0.6);
-    --glass-edge: rgba(255, 255, 255, 0.1);
-    --glass-highlight: rgba(255, 255, 255, 0.12);
-    --glass-shadow: 0 24px 60px rgba(0, 0, 0, 0.5);
-  }
-  .modal { --glass-bg: rgba(24, 28, 37, 0.9); }
 }
 
 @media (max-width: 700px) {

@@ -6,6 +6,10 @@ tree editor by Vue 3.6 (Vapor Mode)
 - [Vize](https://github.com/ubugeeei-prod/vize) — `.vue` のコンパイル（`@vizejs/vite-plugin`）と lint（`npm run lint`）
 - TypeScript 7.1 (native) — Vize の Content Mapper で `.vue` も含めて型チェック（`npm run typecheck`）
 
+## テーマ
+
+ツールバーのテーマボタンで **自動 → ライト → ダーク** の順に切り替えられます（設定はブラウザの localStorage に保存）。自動のときは OS のライト／ダーク設定に従います。
+
 ## Vim モード
 
 ツールバーの **Vim** ボタンから有効化できます（設定はブラウザの localStorage に保存）。
